@@ -1,0 +1,88 @@
+// This file is part of www.nand2tetris.org
+// and the book "The Elements of Computing Systems"
+// by Nisan and Schocken, MIT Press.
+// File name: projects/12/Memory.jack
+
+/**
+ * This library provides two services: direct access to the computer's main
+ * memory (RAM), and allocation and recycling of memory blocks. The Hack RAM
+ * consists of 32,768 words, each holding a 16-bit binary number.
+ */ 
+class Memory {
+
+    static Array ram;
+    static Array heap;
+    static int freeList;
+
+    /** Initializes the class. */
+    function void init() {
+
+        let ram = 0;
+        let heap = 2048;
+        let freeList = 2048;
+        let heap[0] = null;
+        let heap[1] = 14335;
+
+        return;
+    }
+
+    /** Returns the RAM value at the given address. */
+    function int peek(int address) {
+        return ram[address];
+    }
+
+    /** Sets the RAM value at the given address to the given value. */
+    function void poke(int address, int value) {
+        let ram[address] = value;
+        return;
+    }
+
+    /** Finds an available RAM block of the given size and returns
+     *  a reference to its base address. */
+    function int alloc(int size) {
+        var int nextFreeIndex, neededBlockSize, freeListSize, freeListEnd, blockBeginning;
+
+        let nextFreeIndex = freeList - heap;
+        let neededBlockSize = size + 2;
+
+        while (heap[nextFreeIndex + 1] < neededBlockSize) {
+            if (heap[nextFreeIndex] = null) {
+                //implement defrag here
+                do Sys.error(1);
+            }
+
+            else {
+                let nextFreeIndex = heap[nextFreeIndex];
+            }
+        }
+        
+        let freeListSize = heap[nextFreeIndex + 1];
+        let freeListEnd = nextFreeIndex + 2 + freeListSize;
+        let blockBeginning = freeListEnd - size;
+        let heap[blockBeginning] = null;
+        let heap[blockBeginning + 1] = size;
+        let heap[nextFreeIndex + 1] = freeListSize - neededBlockSize;
+        return blockBeginning + 2;
+    }
+
+    /** De-allocates the given object (cast as an array) by making
+     *  it available for future allocations. */
+    function void deAlloc(Array o) {
+        var int blockSize;
+        var int blockNextAddress;
+        var int nextFreeIndex;
+
+        let blockSize = heap[o - 1];
+        let blockNextAddress = o - 2;
+
+        let nextFreeIndex = freeList;
+
+        while (~(heap[nextFreeIndex] = null)) {
+            let nextFreeIndex = heap[nextFreeIndex];
+        }
+
+        let heap[nextFreeIndex] = blockNextAddress;
+
+        return;
+    }    
+}
